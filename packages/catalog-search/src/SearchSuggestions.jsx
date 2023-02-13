@@ -14,15 +14,18 @@ const SearchSuggestions = ({
   const getLinkToCourse = (course) => `/${enterpriseSlug}/course/${course.key}`;
   const getLinkToProgram = (program) => `/${enterpriseSlug}/program/${program.aggregation_key.split(':').pop()}`;
 
+  const courses = autoCompleteHits.filter(hit => hit.learning_type === 'course');
+  const programs = autoCompleteHits.filter(hit => hit.learning_type === 'program');
+  const execEdCourses = autoCompleteHits.filter(hit => hit.learning_type === 'Executive Education');
   return (
     <div className="suggestions" data-testid="suggestions">
+      { courses.length > 0 && (
       <div>
         <div className="mb-2 ml-2 mt-1 font-weight-bold suggestions-section">
           Courses
         </div>
         {
-          autoCompleteHits.filter(hit => hit.content_type === 'course')
-            .slice(0, MAX_NUM_SUGGESTIONS)
+          courses.slice(0, MAX_NUM_SUGGESTIONS)
             .map((hit) => (
               <SearchSuggestionItem
                 key={hit.title}
@@ -34,13 +37,14 @@ const SearchSuggestions = ({
             ))
         }
       </div>
+      )}
+      {programs.length > 0 && (
       <div>
         <div className="mb-2 mt-5 ml-2 font-weight-bold suggestions-section">
           Programs
         </div>
         {
-          autoCompleteHits.filter(hit => hit.content_type === 'program')
-            .slice(0, MAX_NUM_SUGGESTIONS)
+          programs.slice(0, MAX_NUM_SUGGESTIONS)
             .map((hit) => (
               <SearchSuggestionItem
                 key={hit.title}
@@ -52,6 +56,28 @@ const SearchSuggestions = ({
             ))
         }
       </div>
+      )}
+      {/* Currently (Feb 2023) it is not possible to redirect to the learner portal for exec ed content so only display
+       if the redirect is disabled */}
+      {execEdCourses.length > 0 && disableSuggestionRedirect && (
+      <div>
+        <div className="mb-2 mt-5 ml-2 font-weight-bold suggestions-section">
+          Executive Education
+        </div>
+        {
+          execEdCourses.slice(0, MAX_NUM_SUGGESTIONS)
+            .map((hit) => (
+              <SearchSuggestionItem
+                key={hit.title}
+                url={getLinkToCourse(hit)}
+                hit={hit}
+                disableSuggestionRedirect={disableSuggestionRedirect}
+                suggestionItemHandler={handleSuggestionClickSubmit}
+              />
+            ))
+        }
+      </div>
+      )}
       <button type="button" className="btn btn-light w-100 view-all-btn" onClick={handleSubmit}>
         View all results
       </button>
